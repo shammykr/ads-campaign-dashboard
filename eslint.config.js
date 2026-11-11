@@ -23,4 +23,9 @@ export default tseslint.config(
     languageOptions: { ecmaVersion: 2022, sourceType: 'module', globals: globals.node },
     rules: { 'no-unused-vars': ['error', { ignoreRestSiblings: true }] },
   },
+  {
+    // Measurement script mixes Node code with callbacks evaluated in the browser.
+    files: ['scripts/**/*.mjs'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
+  },
 );
