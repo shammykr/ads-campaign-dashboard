@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { CampaignTable } from './features/campaigns/CampaignTable';
+import { Button } from './components/ui';
+import { CreateCampaignWizard } from './features/create/CreateCampaignWizard';
 import { BudgetPacingPanel } from './features/pacing/BudgetPacingPanel';
 import type { Campaign } from './types';
 import { useAppDispatch, useAppSelector } from './store';
@@ -44,6 +46,12 @@ export default function App() {
   const error = useAppSelector(selectCampaignsError);
   const [selectedId, setSelectedId] = useState<string>();
   const onSelect = useCallback((id: string) => setSelectedId(id), []);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [announcement, setAnnouncement] = useState('');
+  const onCreated = useCallback((c: Campaign) => {
+    setSelectedId(c.id);
+    setAnnouncement(`Campaign "${c.name}" created as a draft.`);
+  }, []);
 
   const campaigns = useAppSelector(selectAllCampaigns);
 
@@ -68,13 +76,18 @@ export default function App() {
           <h1>Campaign Manager</h1>
           <p>Create campaigns, track budget pacing and manage delivery.</p>
         </div>
+        <Button onClick={() => setWizardOpen(true)} disabled={loadState !== 'succeeded'}>
+          + New campaign
+        </Button>
       </TopBar>
+      <Notice role="status" aria-live="polite" className={announcement ? undefined : "sr-only"}>{announcement}</Notice>
       <Main>
         {loadState === 'loading' && <Notice role="status">Loading campaigns…</Notice>}
         {error && <Notice role="alert" $error>{error}</Notice>}
         {activeId && <BudgetPacingPanel campaignId={activeId} />}
         {loadState === 'succeeded' && <CampaignTable selectedId={activeId} onSelect={onSelect} />}
       </Main>
+      <CreateCampaignWizard open={wizardOpen} onClose={() => setWizardOpen(false)} onCreated={onCreated} />
     </Shell>
   );
 }
