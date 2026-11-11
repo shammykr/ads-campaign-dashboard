@@ -1,8 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { CampaignTable } from './features/campaigns/CampaignTable';
+import { BudgetPacingPanel } from './features/pacing/BudgetPacingPanel';
+import type { Campaign } from './types';
 import { useAppDispatch, useAppSelector } from './store';
-import { fetchCampaigns, selectCampaignsError, selectLoadState } from './store/campaignsSlice';
+import { fetchCampaigns, selectAllCampaigns, selectCampaignsError, selectLoadState } from './store/campaignsSlice';
 
 const Shell = styled.div`
   max-width: 1280px;
@@ -22,6 +24,12 @@ const TopBar = styled.header`
   p { margin: ${({ theme }) => theme.space(1)} 0 0; color: ${({ theme }) => theme.colors.textMuted}; }
 `;
 
+const Main = styled.main`
+  display: flex;
+  flex-direction: column;
+  gap: ${({ theme }) => theme.space(6)};
+`;
+
 const Notice = styled.p<{ $error?: boolean }>`
   margin: 0;
   padding: ${({ theme }) => theme.space(4)};
@@ -37,9 +45,21 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<string>();
   const onSelect = useCallback((id: string) => setSelectedId(id), []);
 
+  const campaigns = useAppSelector(selectAllCampaigns);
+
   useEffect(() => {
     dispatch(fetchCampaigns());
   }, [dispatch]);
+
+  // Default the pacing view to the longest-running active campaign once data arrives.
+  const defaultId = useMemo(
+    () =>
+      campaigns
+        .filter((c) => c.status === 'active')
+        .reduce<Campaign | undefined>((best, c) => (!best || c.startDate < best.startDate ? c : best), undefined)?.id,
+    [campaigns],
+  );
+  const activeId = selectedId ?? defaultId;
 
   return (
     <Shell>
@@ -49,11 +69,12 @@ export default function App() {
           <p>Create campaigns, track budget pacing and manage delivery.</p>
         </div>
       </TopBar>
-      <main>
+      <Main>
         {loadState === 'loading' && <Notice role="status">Loading campaigns…</Notice>}
         {error && <Notice role="alert" $error>{error}</Notice>}
-        {loadState === 'succeeded' && <CampaignTable selectedId={selectedId} onSelect={onSelect} />}
-      </main>
+        {activeId && <BudgetPacingPanel campaignId={activeId} />}
+        {loadState === 'succeeded' && <CampaignTable selectedId={activeId} onSelect={onSelect} />}
+      </Main>
     </Shell>
   );
 }

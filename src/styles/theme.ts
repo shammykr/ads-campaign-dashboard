@@ -24,10 +24,12 @@ export const theme = {
       draft: { bg: '#e8eaee', fg: '#363c47', dot: '#6b7280' },
       ended: { bg: '#ece6f5', fg: '#4b2d7f', dot: '#6f42c1' },
     },
+    // Validated with the dataviz palette checker (CVD + normal-vision separation, 3:1 vs surface).
     chart: {
-      actual: '#1f5fbf',
-      ideal: '#6b7280',
-      daily: '#9cbbe8',
+      actual: '#2a78d6',
+      target: '#c2620a',
+      grid: '#e5e7eb',
+      axis: '#4a5160',
     },
   },
   space: (n: number) => `${n * 4}px`,

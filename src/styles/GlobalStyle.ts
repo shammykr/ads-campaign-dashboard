@@ -30,6 +30,7 @@ export const GlobalStyle = createGlobalStyle`
     background: ${({ theme }) => theme.colors.bg};
   }
   h1, h2, h3 { margin: 0; line-height: 1.2; }
+  .sr-only { ${visuallyHidden} }
   button, input, select { font: inherit; }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; animation: none !important; }
