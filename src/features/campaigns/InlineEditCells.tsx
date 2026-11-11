@@ -60,7 +60,11 @@ export const BudgetCell = memo(function BudgetCell({ campaign }: { campaign: Cam
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') commit();
+    if (e.key === 'Enter') {
+      // Prevent the Enter key from also activating the trigger button that regains focus.
+      e.preventDefault();
+      commit();
+    }
     if (e.key === 'Escape') {
       e.stopPropagation();
       setEditing(false);
@@ -89,6 +93,7 @@ export const BudgetCell = memo(function BudgetCell({ campaign }: { campaign: Cam
       autoFocus
       value={draft}
       error={error}
+      onFocus={(e) => e.target.select()}
       onChange={(e) => setDraft(e.target.value)}
       onKeyDown={onKeyDown}
       onBlur={commit}
